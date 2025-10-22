@@ -60,6 +60,21 @@ export class Game {
         }
     }
 
+    placeBlockPerfectly() {
+        if (!this.activeBlock || this.gameState !== 'playing') return;
+
+        const prevBlock = this.stack[this.stack.length - 1];
+        const direction = this.activeBlock.userData.direction;
+
+        if (direction === 'x') {
+            this.activeBlock.position.x = prevBlock.mesh.position.x;
+        } else { // direction === 'z'
+            this.activeBlock.position.z = prevBlock.mesh.position.z;
+        }
+
+        this.placeBlock();
+    }
+
     addBlock(x, z, width, depth, type) {
         const y = BLOCK_HEIGHT * this.stack.length;
         const geometry = new THREE.BoxGeometry(width, BLOCK_HEIGHT, depth);

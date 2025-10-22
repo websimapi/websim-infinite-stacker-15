@@ -11,6 +11,8 @@ let game, ui, replayRecorder, canvasUI;
 let scene, world, camera, renderer, uiScene, uiCamera;
 let currentScore = 0;
 let isScoreSubmitted = false;
+let cheatKeyHeld = false;
+let cheatInterval = null;
 
 const room = new WebsimSocket();
 
@@ -166,6 +168,39 @@ function setupEventListeners() {
             uiCamera.bottom = -window.innerHeight / 2;
             uiCamera.updateProjectionMatrix();
             canvasUI.onWindowResize();
+        }
+    });
+
+    window.addEventListener('keydown', (e) => {
+        if (e.code === 'Backquote' && game.getState() === 'playing') {
+            if (!cheatKeyHeld) {
+                cheatKeyHeld = true;
+                ui.showInstructions(false);
+                game.placeBlockPerfectly(); // Place one immediately
+                if (cheatInterval) clearInterval(cheatInterval);
+                cheatInterval = setInterval(() => {
+                    if (game.getState() === 'playing') {
+                        game.placeBlockPerfectly();
+                    } else {
+                        // Game over or other state, stop cheating
+                        cheatKeyHeld = false;
+                        if (cheatInterval) {
+                            clearInterval(cheatInterval);
+                            cheatInterval = null;
+                        }
+                    }
+                }, 100);
+            }
+        }
+    });
+
+    window.addEventListener('keyup', (e) => {
+        if (e.code === 'Backquote') {
+            cheatKeyHeld = false;
+            if (cheatInterval) {
+                clearInterval(cheatInterval);
+                cheatInterval = null;
+            }
         }
     });
 }
